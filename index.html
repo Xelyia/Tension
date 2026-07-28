@@ -220,9 +220,34 @@
     border-radius:3px;
     padding:1px 8px;
   }
+  .save-toast{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--normal);
+    color:#fff;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:13px;
+    font-weight:bold;
+    padding:8px 16px;
+    border-radius:20px;
+    opacity:0;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+    pointer-events:none;
+    z-index:50;
+  }
+  .save-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  @media print{
+    .save-toast{display:none;}
+  }
 </style>
 </head>
 <body>
+<div class="save-toast" id="saveToast">✓ Enregistré</div>
 <div class="sheet">
   <h1>Suivi mensuel de la tension artérielle</h1>
   <div class="sub">À remplir 3 fois par jour (matin, midi, soir) — à apporter au médecin</div>
@@ -336,6 +361,15 @@ function saveRow(key, timeInput, sysInput, diaInput, pulseInput){
     pulse: pulseInput.value
   };
   localStorage.setItem(DATA_KEY, JSON.stringify(savedData));
+  showSavedToast();
+}
+
+let toastTimer = null;
+function showSavedToast(){
+  const toast = document.getElementById('saveToast');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 1200);
 }
 
 loadMeta();
@@ -450,7 +484,7 @@ function generateMonth(){
 }
 
 document.getElementById('generateBtn').addEventListener('click', ()=>{ saveMeta(); generateMonth(); });
-patientNameInput.addEventListener('input', saveMeta);
+patientNameInput.addEventListener('input', ()=>{ saveMeta(); showSavedToast(); });
 document.getElementById('printBtn').addEventListener('click', ()=>window.print());
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   if(!confirm('Effacer toutes les valeurs saisies pour de bon ?')) return;
